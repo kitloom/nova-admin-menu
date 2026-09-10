@@ -11,6 +11,13 @@
     ],
     "homepage": "https://github.com/kitloom/nova-menu-weights",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "kitloom",
+            "email": "kitloom@kitloom.dev",
+            "homepage": "https://github.com/kitloom"
+        }
+    ],
     "support": {
         "issues": "https://github.com/kitloom/nova-menu-weights/issues",
         "source": "https://github.com/kitloom/nova-menu-weights"
