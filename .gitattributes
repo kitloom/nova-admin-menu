@@ -8,3 +8,4 @@
 /package-lock.json  export-ignore
 /phpunit.xml.dist   export-ignore
 /webpack.mix.js     export-ignore
+/composer.lock      export-ignore

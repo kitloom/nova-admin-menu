@@ -58,5 +58,11 @@
     "prefer-stable": true,
     "scripts": {
         "test": "phpunit"
+    },
+    "repositories": {
+        "nova": {
+            "type": "composer",
+            "url": "https://nova.laravel.com"
+        }
     }
 }
