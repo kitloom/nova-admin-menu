@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Innovation\NovaMenuWeights;
+namespace Kitloom\NovaMenuWeights;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
