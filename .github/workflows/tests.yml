@@ -29,9 +29,6 @@ jobs:
           composer config repositories.nova composer https://nova.laravel.com
           composer config http-basic.nova.laravel.com "${{ secrets.NOVA_USERNAME }}" "${{ secrets.NOVA_LICENSE_KEY }}"
 
-      # install, not update: the lock pins Nova to a release this licence
-      # covers. Resolving afresh would pick a newer build and the dist server
-      # answers 402 for anything past the licence's update window.
-      - run: composer install --prefer-dist --no-interaction --no-progress
+      - run: composer update --prefer-dist --no-interaction --no-progress
 
       - run: vendor/bin/phpunit

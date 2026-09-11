@@ -7,5 +7,5 @@
 /package.json       export-ignore
 /package-lock.json  export-ignore
 /phpunit.xml.dist   export-ignore
+/art                export-ignore
 /webpack.mix.js     export-ignore
-/composer.lock      export-ignore
