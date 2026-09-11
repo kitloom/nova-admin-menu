@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Tests;
+namespace Kitloom\NovaAdminMenu\Tests;
 
 use Illuminate\Http\Request;
-use Kitloom\NovaMenuWeights\MenuWeights;
-use Kitloom\NovaMenuWeights\Repositories\ArrayOverrideRepository;
-use Kitloom\NovaMenuWeights\Support\CustomEntries;
-use Kitloom\NovaMenuWeights\Support\MenuClassMap;
-use Kitloom\NovaMenuWeights\Support\MenuEntries;
-use Kitloom\NovaMenuWeights\Support\MenuIdentity;
-use Kitloom\NovaMenuWeights\Support\MenuSignature;
-use Kitloom\NovaMenuWeights\Support\MenuTree;
+use Kitloom\NovaAdminMenu\AdminMenu;
+use Kitloom\NovaAdminMenu\Repositories\ArrayOverrideRepository;
+use Kitloom\NovaAdminMenu\Support\CustomEntries;
+use Kitloom\NovaAdminMenu\Support\MenuClassMap;
+use Kitloom\NovaAdminMenu\Support\MenuEntries;
+use Kitloom\NovaAdminMenu\Support\MenuIdentity;
+use Kitloom\NovaAdminMenu\Support\MenuSignature;
+use Kitloom\NovaAdminMenu\Support\MenuTree;
 use Laravel\Nova\Menu\Menu;
 use Laravel\Nova\Menu\MenuGroup;
 use Laravel\Nova\Menu\MenuItem;
@@ -20,7 +20,7 @@ use Laravel\Nova\Menu\MenuList;
 use Laravel\Nova\Menu\MenuSection;
 use PHPUnit\Framework\TestCase;
 
-final class MenuWeightsTest extends TestCase
+final class AdminMenuTest extends TestCase
 {
     public function test_it_sorts_entries_by_weight_descending(): void
     {
@@ -441,7 +441,7 @@ final class MenuWeightsTest extends TestCase
 
         $repository = new ArrayOverrideRepository(['App\Nova\A' => ['weight' => 9000]]);
         $signatures = new MenuSignature;
-        $weights = (new MenuWeights(
+        $weights = (new AdminMenu(
             repository: $repository,
             signatures: $signatures,
             entries: new MenuEntries($signatures),
@@ -645,12 +645,12 @@ final class MenuWeightsTest extends TestCase
     /**
      * @param  array<string, array<string, mixed>|int>  $overrides
      */
-    private function menuWeights(array $overrides, MenuClassMap $map): MenuWeights
+    private function menuWeights(array $overrides, MenuClassMap $map): AdminMenu
     {
         $signatures = new MenuSignature;
         $repository = new ArrayOverrideRepository($overrides);
 
-        return (new MenuWeights(
+        return (new AdminMenu(
             repository: $repository,
             signatures: $signatures,
             entries: new MenuEntries($signatures),

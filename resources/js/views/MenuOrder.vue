@@ -1,9 +1,9 @@
 <template>
   <LoadingView :loading="loading">
-    <Head :title="__('Menu Order')" />
+    <Head :title="title" />
 
     <div class="flex items-center justify-between mb-6">
-      <Heading>{{ __('Menu Order') }}</Heading>
+      <Heading>{{ title }}</Heading>
 
       <div class="flex items-center gap-3">
         <button
@@ -178,6 +178,11 @@ import { detach, flatten, move } from '../tree';
 export default {
   components: { MenuBranch },
 
+  props: {
+    path: { type: String, default: null },
+    title: { type: String, default: 'Admin Menu' },
+  },
+
   provide() {
     return {
       drag: this.drag,
@@ -214,7 +219,7 @@ export default {
       this.loading = true;
 
       try {
-        const { data } = await Nova.request().get('/nova-vendor/nova-menu-weights/entries');
+        const { data } = await Nova.request().get('/nova-vendor/nova-admin-menu/entries');
         this.tree = data.tree;
         this.permissions = data.permissions || [];
       } catch (error) {
@@ -255,7 +260,7 @@ export default {
       this.createError = null;
 
       try {
-        await Nova.request().post('/nova-vendor/nova-menu-weights/custom', this.draft);
+        await Nova.request().post('/nova-vendor/nova-admin-menu/custom', this.draft);
 
         this.creating = false;
         await this.fetchTree();
@@ -270,7 +275,7 @@ export default {
       const id = node.id.replace('menu_custom:', '');
 
       try {
-        await Nova.request().delete(`/nova-vendor/nova-menu-weights/custom/${id}`);
+        await Nova.request().delete(`/nova-vendor/nova-admin-menu/custom/${id}`);
         await this.fetchTree();
       } catch (error) {
         Nova.error(this.__('Could not delete the entry.'));
@@ -281,7 +286,7 @@ export default {
       this.resetting = true;
 
       try {
-        await Nova.request().delete('/nova-vendor/nova-menu-weights/entries');
+        await Nova.request().delete('/nova-vendor/nova-admin-menu/entries');
 
         // The sidebar is rendered server side, so the menu only goes back to
         // its defaults on the next page load.
@@ -297,7 +302,7 @@ export default {
       this.saving = true;
 
       try {
-        await Nova.request().post('/nova-vendor/nova-menu-weights/entries', {
+        await Nova.request().post('/nova-vendor/nova-admin-menu/entries', {
           entries: flatten(this.tree),
         });
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Support;
+namespace Kitloom\NovaAdminMenu\Support;
 
 /**
  * What the admin has changed about one menu entry. Every field is optional:

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Support;
+namespace Kitloom\NovaAdminMenu\Support;
 
 use Laravel\Nova\Menu\MenuCollection;
 use Laravel\Nova\Menu\MenuGroup;

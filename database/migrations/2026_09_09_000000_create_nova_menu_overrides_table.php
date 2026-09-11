@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $table = config('nova-menu-weights.table', 'nova_menu_overrides');
+        $table = config('nova-admin-menu.table', 'nova_menu_overrides');
 
         if (Schema::hasTable($table)) {
             return;
@@ -19,6 +19,12 @@ return new class extends Migration
 
             // Class name, menu_path:… or menu_label:… - see MenuIdentity.
             $table->string('identity')->unique();
+
+            // Set only on entries this package creates itself: section, group
+            // or item, and where a link points. Null on a row that merely
+            // overrides something the application already renders.
+            $table->string('type', 16)->nullable();
+            $table->string('path')->nullable();
 
             $table->integer('weight')->nullable();
             $table->string('parent_identity')->nullable()->index();
@@ -36,6 +42,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists(config('nova-menu-weights.table', 'nova_menu_overrides'));
+        Schema::dropIfExists(config('nova-admin-menu.table', 'nova_menu_overrides'));
     }
 };

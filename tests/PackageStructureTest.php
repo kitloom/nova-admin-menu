@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Tests;
+namespace Kitloom\NovaAdminMenu\Tests;
 
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
@@ -17,7 +17,7 @@ use RecursiveIteratorIterator;
  */
 final class PackageStructureTest extends TestCase
 {
-    private const PREFIX = 'Kitloom\\NovaMenuWeights';
+    private const PREFIX = 'Kitloom\\NovaAdminMenu';
 
     public function test_every_source_file_declares_the_namespace_its_path_implies(): void
     {

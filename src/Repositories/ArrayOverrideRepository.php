@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Repositories;
+namespace Kitloom\NovaAdminMenu\Repositories;
 
-use Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository;
-use Kitloom\NovaMenuWeights\Support\MenuOverride;
+use Kitloom\NovaAdminMenu\Contracts\MenuOverrideRepository;
+use Kitloom\NovaAdminMenu\Support\MenuOverride;
 
 /**
  * In-memory repository, for tests and for a config-driven setup.

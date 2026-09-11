@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Repositories;
+namespace Kitloom\NovaAdminMenu\Repositories;
 
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\QueryException;
-use Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository;
-use Kitloom\NovaMenuWeights\Support\MenuOverride;
+use Kitloom\NovaAdminMenu\Contracts\MenuOverrideRepository;
+use Kitloom\NovaAdminMenu\Support\MenuOverride;
 
 final class DatabaseOverrideRepository implements MenuOverrideRepository
 {

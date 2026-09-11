@@ -25,18 +25,18 @@ keep the position Nova gave them.
 ## Installation
 
 ```bash
-composer require kitloom/nova-menu-weights
+composer require kitloom/nova-admin-menu
 php artisan migrate
 ```
 
 Then sort the menu from your `NovaServiceProvider`:
 
 ```php
-use Kitloom\NovaMenuWeights\Facades\MenuWeights;
+use Kitloom\NovaAdminMenu\Facades\AdminMenu;
 use Laravel\Nova\Menu\Menu;
 use Laravel\Nova\Nova;
 
-Nova::mainMenu(fn (Request $request, Menu $menu) => MenuWeights::sort($menu, $request));
+Nova::mainMenu(fn (Request $request, Menu $menu) => AdminMenu::sort($menu, $request));
 ```
 
 If you build menu entries of your own, merge them in first and sort the result:
@@ -45,7 +45,7 @@ If you build menu entries of your own, merge them in first and sort the result:
 Nova::mainMenu(function (Request $request, Menu $menu) {
     $items = array_merge($myCustomSections, $menu->items->all());
 
-    $menu->items = new MenuCollection(MenuWeights::sortItems($items, $request));
+    $menu->items = new MenuCollection(AdminMenu::sortItems($items, $request));
 
     return $menu;
 });
@@ -53,7 +53,7 @@ Nova::mainMenu(function (Request $request, Menu $menu) {
 
 ## Editing the weights
 
-The package registers a Nova tool at `/nova-menu-weights` showing the menu as a tree. Drag the rows,
+The package registers a Nova tool at `/nova-admin-menu` showing the menu as a tree. Drag the rows,
 hit save, and the weights are recalculated from the position — in steps of 100, so there is room to
 slot things in by hand later. Nothing to wire up: the tool, its route and its sidebar entry are
 registered by the service provider.
@@ -92,11 +92,11 @@ back. That is the difference from `menu.hide_paths` in the config, which removes
 and gives no way to restore it from the UI.
 
 ```php
-// config/nova-menu-weights.php
+// config/nova-admin-menu.php
 'tool' => [
     'register' => true,
-    'path' => 'nova-menu-weights',
-    'title' => 'Menu Order',
+    'path' => 'nova-admin-menu',
+    'title' => 'Admin Menu',
     'show_in_sidebar' => true,
     'step' => 100,
 ],
@@ -108,19 +108,19 @@ cannot create arbitrary settings rows.
 ### Your own screen
 
 ```php
-use Kitloom\NovaMenuWeights\Facades\MenuWeights;
+use Kitloom\NovaAdminMenu\Facades\AdminMenu;
 
-foreach (MenuWeights::entries()->all($request) as $entry) {
+foreach (AdminMenu::entries()->all($request) as $entry) {
     // $entry['class'], $entry['label'], $entry['type']
-    $weight = MenuWeights::weightForClass($entry['class']);
+    $weight = AdminMenu::weightForClass($entry['class']);
 }
 ```
 
 The tool's own endpoints return the menu as a tree instead, which is what nested entries need:
 
 ```
-GET  /nova-vendor/nova-menu-weights/entries
-POST /nova-vendor/nova-menu-weights/entries   {"order": ["<identity>", ...]}
+GET  /nova-vendor/nova-admin-menu/entries
+POST /nova-vendor/nova-admin-menu/entries   {"order": ["<identity>", ...]}
 ```
 
 ## Storage
@@ -142,13 +142,13 @@ natural one would freeze the structure, and a later version of a tool adding a c
 its life fighting a stale override.
 
 The whole table is loaded in one query and cached. To keep the overrides
-somewhere else, implement `Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository`
-and name it in `nova-menu-weights.repository`.
+somewhere else, implement `Kitloom\NovaAdminMenu\Contracts\MenuOverrideRepository`
+and name it in `nova-admin-menu.repository`.
 
 Publish the config to change any of this:
 
 ```bash
-php artisan vendor:publish --tag=nova-menu-weights-config
+php artisan vendor:publish --tag=nova-admin-menu-config
 ```
 
 ## Restricting entries
@@ -161,7 +161,7 @@ against gates — so the application says what they mean:
 
 ```php
 // AppServiceProvider or NovaServiceProvider
-MenuWeights::authorizeUsing(fn (Request $request, array $permissions) => $request->user()->isSuperAdmin()
+AdminMenu::authorizeUsing(fn (Request $request, array $permissions) => $request->user()->isSuperAdmin()
     || collect($permissions)->contains(fn (string $p) => $request->user()->hasPermissionTo($p)));
 ```
 
@@ -173,7 +173,7 @@ even for a super admin.
 To fill the suggestion list on the editing screen:
 
 ```php
-MenuWeights::permissionsUsing(fn () => Permission::pluck('name')->all());
+AdminMenu::permissionsUsing(fn () => Permission::pluck('name')->all());
 ```
 
 ### This hides links, it does not protect pages

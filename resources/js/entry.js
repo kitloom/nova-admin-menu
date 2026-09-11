@@ -1,6 +1,6 @@
 // Build stamp: lets a stale tab be spotted from the console.
-window.__nmwBuild = __NMW_BUILD__;
+window.__adminMenuBuild = __ADMIN_MENU_BUILD__;
 
 Nova.booting(() => {
-  Nova.inertia('NovaMenuWeights', require('./views/MenuOrder').default);
+  Nova.inertia('NovaAdminMenu', require('./views/MenuOrder').default);
 });

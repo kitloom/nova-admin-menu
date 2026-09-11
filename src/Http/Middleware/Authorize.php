@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Http\Middleware;
+namespace Kitloom\NovaAdminMenu\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Kitloom\NovaMenuWeights\MenuWeightsTool;
+use Kitloom\NovaAdminMenu\AdminMenuTool;
 use Laravel\Nova\Nova;
 use Laravel\Nova\Tool;
 
@@ -21,6 +21,6 @@ class Authorize
 
     public function matchesTool(Tool $tool): bool
     {
-        return $tool instanceof MenuWeightsTool;
+        return $tool instanceof AdminMenuTool;
     }
 }

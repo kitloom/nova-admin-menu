@@ -1,5 +1,5 @@
 {
-    "name": "kitloom/nova-menu-weights",
+    "name": "kitloom/nova-admin-menu",
     "description": "Reorder the Laravel Nova main menu from the admin panel: weights for tools, resources and dashboards, stored in the database instead of hardcoded in the service provider.",
     "keywords": [
         "laravel",
@@ -9,7 +9,7 @@
         "navigation",
         "sorting"
     ],
-    "homepage": "https://github.com/kitloom/nova-menu-weights",
+    "homepage": "https://github.com/kitloom/nova-admin-menu",
     "license": "MIT",
     "authors": [
         {
@@ -19,8 +19,8 @@
         }
     ],
     "support": {
-        "issues": "https://github.com/kitloom/nova-menu-weights/issues",
-        "source": "https://github.com/kitloom/nova-menu-weights"
+        "issues": "https://github.com/kitloom/nova-admin-menu/issues",
+        "source": "https://github.com/kitloom/nova-admin-menu"
     },
     "require": {
         "php": "^8.2",
@@ -33,21 +33,21 @@
     },
     "autoload": {
         "psr-4": {
-            "Kitloom\\NovaMenuWeights\\": "src/"
+            "Kitloom\\NovaAdminMenu\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Kitloom\\NovaMenuWeights\\Tests\\": "tests/"
+            "Kitloom\\NovaAdminMenu\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Kitloom\\NovaMenuWeights\\NovaMenuWeightsServiceProvider"
+                "Kitloom\\NovaAdminMenu\\NovaAdminMenuServiceProvider"
             ],
             "aliases": {
-                "MenuWeights": "Kitloom\\NovaMenuWeights\\Facades\\MenuWeights"
+                "AdminMenu": "Kitloom\\NovaAdminMenu\\Facades\\AdminMenu"
             }
         }
     },

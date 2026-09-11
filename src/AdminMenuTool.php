@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights;
+namespace Kitloom\NovaAdminMenu;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Menu\MenuSection;
@@ -12,21 +12,21 @@ use Laravel\Nova\Tool;
 /**
  * The drag and drop screen for reordering the main menu.
  */
-class MenuWeightsTool extends Tool
+class AdminMenuTool extends Tool
 {
     public function boot(): void
     {
-        Nova::script('nova-menu-weights', __DIR__.'/../dist/js/entry.js');
+        Nova::script('nova-admin-menu', __DIR__.'/../dist/js/entry.js');
     }
 
     public function menu(Request $request): ?MenuSection
     {
-        if (! config('nova-menu-weights.tool.show_in_sidebar', true)) {
+        if (! config('nova-admin-menu.tool.show_in_sidebar', true)) {
             return null;
         }
 
-        return MenuSection::make(__(config('nova-menu-weights.tool.title', 'Menu Order')))
-            ->path(config('nova-menu-weights.tool.path', 'nova-menu-weights'))
+        return MenuSection::make(__(config('nova-admin-menu.tool.title', 'Admin Menu')))
+            ->path(config('nova-admin-menu.tool.path', 'nova-admin-menu'))
             ->icon('bars-3');
     }
 }

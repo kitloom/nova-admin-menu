@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Support;
+namespace Kitloom\NovaAdminMenu\Support;
 
 /**
  * Names a menu entry for storage.

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Contracts;
+namespace Kitloom\NovaAdminMenu\Contracts;
 
-use Kitloom\NovaMenuWeights\Support\MenuOverride;
+use Kitloom\NovaAdminMenu\Support\MenuOverride;
 
 /**
  * Storage for what the admin has changed about the menu.

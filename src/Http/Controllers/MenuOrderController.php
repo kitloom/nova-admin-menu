@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Http\Controllers;
+namespace Kitloom\NovaAdminMenu\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
-use Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository;
-use Kitloom\NovaMenuWeights\MenuWeights;
-use Kitloom\NovaMenuWeights\Support\MenuIdentity;
-use Kitloom\NovaMenuWeights\Support\MenuSignature;
+use Kitloom\NovaAdminMenu\AdminMenu;
+use Kitloom\NovaAdminMenu\Contracts\MenuOverrideRepository;
+use Kitloom\NovaAdminMenu\Support\MenuIdentity;
+use Kitloom\NovaAdminMenu\Support\MenuSignature;
 
 class MenuOrderController extends Controller
 {
     public function __construct(
-        private readonly MenuWeights $menuWeights,
+        private readonly AdminMenu $menuWeights,
         private readonly MenuOverrideRepository $repository,
         private readonly MenuSignature $signatures,
     ) {}
@@ -68,9 +68,9 @@ class MenuOrderController extends Controller
             return response()->json(['message' => __('No known menu entries were submitted.')], 422);
         }
 
-        $step = (int) config('nova-menu-weights.tool.step', 100);
+        $step = (int) config('nova-admin-menu.tool.step', 100);
         $total = $entries->count();
-        $reparenting = (bool) config('nova-menu-weights.menu.allow_reparenting', true);
+        $reparenting = (bool) config('nova-admin-menu.menu.allow_reparenting', true);
         $natural = $reparenting ? $this->menuWeights->naturalParents($request) : [];
 
         $this->repository->putMany(

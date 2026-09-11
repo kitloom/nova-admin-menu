@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Support;
+namespace Kitloom\NovaAdminMenu\Support;
 
 /**
  * Maps a rendered menu entry back to the tool / resource / dashboard class it

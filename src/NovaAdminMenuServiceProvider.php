@@ -2,29 +2,29 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights;
+namespace Kitloom\NovaAdminMenu;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository;
-use Kitloom\NovaMenuWeights\Facades\MenuWeights as MenuWeightsFacade;
-use Kitloom\NovaMenuWeights\Http\Middleware\Authorize;
-use Kitloom\NovaMenuWeights\Repositories\DatabaseOverrideRepository;
-use Kitloom\NovaMenuWeights\Support\CustomEntries;
-use Kitloom\NovaMenuWeights\Support\MenuEntries;
-use Kitloom\NovaMenuWeights\Support\MenuSignature;
-use Kitloom\NovaMenuWeights\Support\MenuTree;
+use Kitloom\NovaAdminMenu\Contracts\MenuOverrideRepository;
+use Kitloom\NovaAdminMenu\Facades\AdminMenu as AdminMenuFacade;
+use Kitloom\NovaAdminMenu\Http\Middleware\Authorize;
+use Kitloom\NovaAdminMenu\Repositories\DatabaseOverrideRepository;
+use Kitloom\NovaAdminMenu\Support\CustomEntries;
+use Kitloom\NovaAdminMenu\Support\MenuEntries;
+use Kitloom\NovaAdminMenu\Support\MenuSignature;
+use Kitloom\NovaAdminMenu\Support\MenuTree;
 use Laravel\Nova\Http\Middleware\Authenticate;
 use Laravel\Nova\Menu\Menu;
 use Laravel\Nova\Nova;
 
-final class NovaMenuWeightsServiceProvider extends ServiceProvider
+final class NovaAdminMenuServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/nova-menu-weights.php', 'nova-menu-weights');
+        $this->mergeConfigFrom(__DIR__.'/../config/nova-admin-menu.php', 'nova-admin-menu');
 
         $this->registerRoutes();
 
@@ -35,7 +35,7 @@ final class NovaMenuWeightsServiceProvider extends ServiceProvider
 
         $this->app->singleton(MenuOverrideRepository::class, function (Application $app): MenuOverrideRepository {
             $config = $app['config'];
-            $repository = $config->get('nova-menu-weights.repository', DatabaseOverrideRepository::class);
+            $repository = $config->get('nova-admin-menu.repository', DatabaseOverrideRepository::class);
 
             if ($repository !== DatabaseOverrideRepository::class) {
                 return $app->make($repository);
@@ -44,22 +44,22 @@ final class NovaMenuWeightsServiceProvider extends ServiceProvider
             return new DatabaseOverrideRepository(
                 connection: $app->make('db')->connection(),
                 cache: $app->make('cache')->store(),
-                table: (string) $config->get('nova-menu-weights.table', 'nova_menu_overrides'),
-                cacheEnabled: (bool) $config->get('nova-menu-weights.cache.enabled', true),
-                cacheKey: (string) $config->get('nova-menu-weights.cache.key', 'nova_menu_overrides'),
-                cacheTtl: (int) $config->get('nova-menu-weights.cache.ttl', 3600),
+                table: (string) $config->get('nova-admin-menu.table', 'nova_menu_overrides'),
+                cacheEnabled: (bool) $config->get('nova-admin-menu.cache.enabled', true),
+                cacheKey: (string) $config->get('nova-admin-menu.cache.key', 'nova_menu_overrides'),
+                cacheTtl: (int) $config->get('nova-admin-menu.cache.ttl', 3600),
             );
         });
 
-        $this->app->singleton(MenuWeights::class, function (Application $app): MenuWeights {
-            return new MenuWeights(
+        $this->app->singleton(AdminMenu::class, function (Application $app): AdminMenu {
+            return new AdminMenu(
                 repository: $app->make(MenuOverrideRepository::class),
                 signatures: $app->make(MenuSignature::class),
                 entries: $app->make(MenuEntries::class),
                 tree: $app->make(MenuTree::class),
                 custom: $app->make(CustomEntries::class),
-                defaultWeight: (int) $app['config']->get('nova-menu-weights.default_weight', 500),
-                allowReparenting: (bool) $app['config']->get('nova-menu-weights.menu.allow_reparenting', true),
+                defaultWeight: (int) $app['config']->get('nova-admin-menu.default_weight', 500),
+                allowReparenting: (bool) $app['config']->get('nova-admin-menu.menu.allow_reparenting', true),
             );
         });
     }
@@ -69,18 +69,18 @@ final class NovaMenuWeightsServiceProvider extends ServiceProvider
         $this->registerMainMenu();
         $this->registerTool();
 
-        if (config('nova-menu-weights.repository') === DatabaseOverrideRepository::class) {
+        if (config('nova-admin-menu.repository') === DatabaseOverrideRepository::class) {
             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         }
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__.'/../config/nova-menu-weights.php' => config_path('nova-menu-weights.php'),
-            ], 'nova-menu-weights-config');
+                __DIR__.'/../config/nova-admin-menu.php' => config_path('nova-admin-menu.php'),
+            ], 'nova-admin-menu-config');
 
             $this->publishes([
                 __DIR__.'/../database/migrations' => database_path('migrations'),
-            ], 'nova-menu-weights-migrations');
+            ], 'nova-admin-menu-migrations');
         }
     }
 
@@ -89,23 +89,23 @@ final class NovaMenuWeightsServiceProvider extends ServiceProvider
      *
      * Nova keeps a single mainMenu callback, so an application that registers
      * its own silently replaces this one. Such an application should set
-     * `menu.register` to false and call MenuWeights::sort() itself.
+     * `menu.register` to false and call AdminMenu::sort() itself.
      */
     private function registerMainMenu(): void
     {
         $config = $this->app['config'];
 
-        if (! $config->get('nova-menu-weights.menu.register', true)) {
+        if (! $config->get('nova-admin-menu.menu.register', true)) {
             return;
         }
 
-        $hidden = (array) $config->get('nova-menu-weights.menu.hide_paths', []);
+        $hidden = (array) $config->get('nova-admin-menu.menu.hide_paths', []);
 
         if ($hidden !== []) {
-            $this->app->make(MenuWeights::class)->hidePaths($hidden);
+            $this->app->make(AdminMenu::class)->hidePaths($hidden);
         }
 
-        Nova::mainMenu(static fn (Request $request, Menu $menu): Menu => MenuWeightsFacade::sort($menu, $request));
+        Nova::mainMenu(static fn (Request $request, Menu $menu): Menu => AdminMenuFacade::sort($menu, $request));
     }
 
     /**
@@ -114,10 +114,15 @@ final class NovaMenuWeightsServiceProvider extends ServiceProvider
     private function registerRoutes(): void
     {
         Nova::router()->group(function ($router) {
-            $path = (string) config('nova-menu-weights.tool.path', 'nova-menu-weights');
+            $path = (string) config('nova-admin-menu.tool.path', 'nova-admin-menu');
 
             $router
-                ->get($path, fn () => inertia('NovaMenuWeights', ['path' => $path]))
+                ->get($path, fn () => inertia('NovaAdminMenu', [
+                    'path' => $path,
+                    // One source for the name, so the page and the sidebar
+                    // entry cannot drift apart.
+                    'title' => __((string) config('nova-admin-menu.tool.title', 'Admin Menu')),
+                ]))
                 ->middleware(['nova', Authenticate::class])
                 ->domain(config('nova.domain'));
         });
@@ -137,12 +142,12 @@ final class NovaMenuWeightsServiceProvider extends ServiceProvider
      */
     private function registerTool(): void
     {
-        if (! $this->app['config']->get('nova-menu-weights.tool.register', true)) {
+        if (! $this->app['config']->get('nova-admin-menu.tool.register', true)) {
             return;
         }
 
         Nova::serving(static function (): void {
-            Nova::tools([new MenuWeightsTool]);
+            Nova::tools([new AdminMenuTool]);
         });
     }
 }

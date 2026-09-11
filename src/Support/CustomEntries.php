@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights\Support;
+namespace Kitloom\NovaAdminMenu\Support;
 
-use Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository;
+use Kitloom\NovaAdminMenu\Contracts\MenuOverrideRepository;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
 use SplObjectStorage;

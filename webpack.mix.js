@@ -10,14 +10,14 @@ mix
         plugins: [
             // Stamps each build so a stale tab can be spotted from the console.
             new webpack.DefinePlugin({
-                __NMW_BUILD__: JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ')),
+                __ADMIN_MENU_BUILD__: JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ')),
             }),
         ],
         externals: {
             vue: 'Vue',
         },
         output: {
-            uniqueName: 'kitloom/nova-menu-weights',
+            uniqueName: 'kitloom/nova-admin-menu',
         },
         resolve: {
             modules: [

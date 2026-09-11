@@ -1,6 +1,6 @@
 <?php
 
-use Kitloom\NovaMenuWeights\Repositories\DatabaseOverrideRepository;
+use Kitloom\NovaAdminMenu\Repositories\DatabaseOverrideRepository;
 
 return [
     /*
@@ -8,7 +8,7 @@ return [
     | Storage
     |--------------------------------------------------------------------------
     |
-    | Implementation of Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository
+    | Implementation of Kitloom\NovaAdminMenu\Contracts\MenuOverrideRepository
     | holding what the admin has changed about the menu.
     |
     */
@@ -35,7 +35,7 @@ return [
     |
     | Register the Nova::mainMenu callback that applies the sorting. Nova only
     | keeps ONE such callback, so turn this off if the application registers
-    | its own - and call MenuWeights::sort($menu, $request) from inside it.
+    | its own - and call AdminMenu::sort($menu, $request) from inside it.
     |
     | `hide_paths` drops entries before sorting; '/dashboards/main' hides
     | Nova's default dashboard.
@@ -67,8 +67,8 @@ return [
     */
     'tool' => [
         'register' => true,
-        'path' => 'nova-menu-weights',
-        'title' => 'Menu Order',
+        'path' => 'nova-admin-menu',
+        'title' => 'Admin Menu',
         'show_in_sidebar' => true,
         'step' => 100,
     ],

@@ -2,25 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Kitloom\NovaMenuWeights;
+namespace Kitloom\NovaAdminMenu;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
-use Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository;
-use Kitloom\NovaMenuWeights\Support\CustomEntries;
-use Kitloom\NovaMenuWeights\Support\MenuClassMap;
-use Kitloom\NovaMenuWeights\Support\MenuEntries;
-use Kitloom\NovaMenuWeights\Support\MenuIdentity;
-use Kitloom\NovaMenuWeights\Support\MenuOverride;
-use Kitloom\NovaMenuWeights\Support\MenuSignature;
-use Kitloom\NovaMenuWeights\Support\MenuTree;
+use Kitloom\NovaAdminMenu\Contracts\MenuOverrideRepository;
+use Kitloom\NovaAdminMenu\Support\CustomEntries;
+use Kitloom\NovaAdminMenu\Support\MenuClassMap;
+use Kitloom\NovaAdminMenu\Support\MenuEntries;
+use Kitloom\NovaAdminMenu\Support\MenuIdentity;
+use Kitloom\NovaAdminMenu\Support\MenuOverride;
+use Kitloom\NovaAdminMenu\Support\MenuSignature;
+use Kitloom\NovaAdminMenu\Support\MenuTree;
 use Laravel\Nova\Menu\Menu;
 use Laravel\Nova\Menu\MenuCollection;
 use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\Nova;
 
-final class MenuWeights
+final class AdminMenu
 {
     private ?MenuClassMap $classMap = null;
 
