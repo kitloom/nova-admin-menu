@@ -16,10 +16,17 @@ override on top of whatever the application builds.
 - Storage is a **contract**: one small table by default, or plug in your own
 - No changes to your resource classes
 
+![The menu, as the admin arranges it](art/menu-tree.png)
+
+Sections and links the admin added, entries moved into them, the sidebar on the left showing the
+result.
+
+![Adding an entry](art/add-entry.png)
+
 ## Requirements
 
 - PHP 8.2+
-- Laravel Nova 5
+- Laravel Nova 5 — built against 5.7, verified on 5.10
 
 ## Installation
 

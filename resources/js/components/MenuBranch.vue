@@ -56,8 +56,12 @@
           >
             {{ __('moved') }}
           </span>
+          <!--
+            An entry added here has no original to compare against: its row
+            holds its only name, so printing it in brackets says it twice.
+          -->
           <span
-            v-if="node.label_override"
+            v-if="node.label_override && ! node.custom"
             class="shrink-0 text-xs text-gray-400"
             :title="__('Renamed. This is what the menu itself calls the entry.')"
           >

@@ -306,7 +306,10 @@ export default {
           entries: flatten(this.tree),
         });
 
-        Nova.success(this.__('Menu order saved. Reload to see the new sidebar.'));
+        // Nova hands the sidebar to the page as props on a full load, so the
+        // result of a save is invisible until the page comes back. Reloading
+        // is what makes Save mean what it says.
+        window.location.reload();
       } catch (error) {
         Nova.error(this.__('Could not save the menu order.'));
       }
