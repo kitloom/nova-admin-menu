@@ -84,6 +84,13 @@ final class DatabaseOverrideRepository implements MenuOverrideRepository
         $this->flush();
     }
 
+    public function clear(): void
+    {
+        $this->connection->table($this->table)->delete();
+
+        $this->flush();
+    }
+
     public function flush(): void
     {
         $this->overrides = null;

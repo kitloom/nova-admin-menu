@@ -99,6 +99,21 @@ class MenuOrderController extends Controller
     }
 
     /**
+     * Throw every override away. The menu goes back to what the application
+     * builds on its own: the order the tools register in, their own labels,
+     * icons and nesting.
+     */
+    public function destroy(Request $request): JsonResponse
+    {
+        $removed = count($this->repository->all());
+
+        $this->repository->clear();
+        $this->menuWeights->flush();
+
+        return response()->json(['removed' => $removed]);
+    }
+
+    /**
      * @return array<int, array<string, mixed>>
      */
     private function tree(Request $request): array

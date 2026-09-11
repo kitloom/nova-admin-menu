@@ -74,6 +74,10 @@ grep -o '\b[A-Z][A-Za-z0-9]*Icon\b' vendor/laravel/nova/public/vendor.js | sort 
 ``` Icons apply to sections only: `MenuItem`, `MenuGroup` and `MenuList` render
 without one in Nova, so there is nothing to override on them.
 
+**Reset** in the header throws every override away after a confirmation — the order, the moves,
+renamed entries, icons, hidden entries and permissions — and reloads the page. The menu goes back
+to what the application builds on its own. There is no undo.
+
 Each row also has a **hide** button. A hidden entry disappears from the sidebar — a hidden section
 takes its children with it — but stays listed on this screen, struck through, so it can be brought
 back. That is the difference from `menu.hide_paths` in the config, which removes an entry outright

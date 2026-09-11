@@ -49,7 +49,7 @@ final class PackageStructureTest extends TestCase
     }
 
     /**
-     * @return array<string, string>  absolute path => path relative to src/
+     * @return array<string, string> absolute path => path relative to src/
      */
     private function sourceFiles(): array
     {

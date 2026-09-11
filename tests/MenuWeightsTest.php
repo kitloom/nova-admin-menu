@@ -365,6 +365,43 @@ final class MenuWeightsTest extends TestCase
         $this->assertSame(['Vendors'], array_map(fn ($i) => (string) $i->name, $nested->items->all()));
     }
 
+    public function test_clearing_drops_every_override(): void
+    {
+        $repository = new ArrayOverrideRepository([
+            'App\Nova\A' => ['weight' => 900, 'hidden' => true],
+            'App\Nova\B' => ['label' => 'Renamed'],
+        ]);
+
+        $this->assertCount(2, $repository->all());
+
+        $repository->clear();
+
+        $this->assertSame([], $repository->all());
+        $this->assertNull($repository->find('App\Nova\A'));
+    }
+
+    public function test_the_menu_falls_back_to_its_own_order_once_cleared(): void
+    {
+        $map = new MenuClassMap;
+        $map->put('item:/a', 'item#A', 'App\Nova\A');
+
+        $repository = new ArrayOverrideRepository(['App\Nova\A' => ['weight' => 9000]]);
+        $signatures = new MenuSignature;
+        $weights = (new MenuWeights(
+            repository: $repository,
+            signatures: $signatures,
+            entries: new MenuEntries($signatures),
+            tree: new MenuTree($signatures),
+            defaultWeight: 500,
+        ))->usingClassMap($map);
+
+        $this->assertSame(9000, $weights->weightForItem(MenuItem::make('A', '/a')));
+
+        $repository->clear();
+
+        $this->assertSame(500, $weights->weightForItem(MenuItem::make('A', '/a')));
+    }
+
     public function test_an_entry_with_no_permissions_is_visible(): void
     {
         $weights = $this->menuWeights([

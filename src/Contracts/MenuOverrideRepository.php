@@ -40,5 +40,11 @@ interface MenuOverrideRepository
 
     public function forget(string $identity): void;
 
+    /**
+     * Drop every override, putting the menu back the way the application
+     * builds it.
+     */
+    public function clear(): void;
+
     public function flush(): void;
 }

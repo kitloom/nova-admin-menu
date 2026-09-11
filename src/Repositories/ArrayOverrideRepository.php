@@ -54,6 +54,11 @@ final class ArrayOverrideRepository implements MenuOverrideRepository
         unset($this->overrides[$identity]);
     }
 
+    public function clear(): void
+    {
+        $this->overrides = [];
+    }
+
     public function flush(): void
     {
         //

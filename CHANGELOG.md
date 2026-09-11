@@ -4,6 +4,10 @@ All notable changes to this package are documented here.
 
 ## Unreleased
 
+- Reset button: drops every override after a confirmation and reloads
+
+## v0.1.0
+
 Initial release.
 
 - Reorder the Nova main menu by dragging, nested entries included
