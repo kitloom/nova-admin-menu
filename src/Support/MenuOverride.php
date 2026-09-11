@@ -19,6 +19,9 @@ final class MenuOverride
         public readonly bool $hidden = false,
         /** @var array<int, string> */
         public readonly array $permissions = [],
+        /** section, group or item - set only on entries this package creates */
+        public readonly ?string $type = null,
+        public readonly ?string $path = null,
     ) {}
 
     /**
@@ -36,6 +39,8 @@ final class MenuOverride
             icon: self::nullableString($attributes['icon'] ?? null),
             hidden: (bool) ($attributes['hidden'] ?? false),
             permissions: self::stringList($attributes['permissions'] ?? null),
+            type: self::nullableString($attributes['type'] ?? null),
+            path: self::nullableString($attributes['path'] ?? null),
         );
     }
 
@@ -51,6 +56,8 @@ final class MenuOverride
             'icon' => $this->icon,
             'hidden' => $this->hidden,
             'permissions' => $this->permissions,
+            'type' => $this->type,
+            'path' => $this->path,
         ];
     }
 

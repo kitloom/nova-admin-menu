@@ -8,6 +8,15 @@
       <div class="flex items-center gap-3">
         <button
           type="button"
+          class="rounded focus:outline-none focus:ring ring-primary-200 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 inline-flex items-center justify-center h-9 px-3 text-sm font-bold disabled:opacity-50"
+          :disabled="saving || resetting"
+          @click="openCreate"
+        >
+          {{ __('Add entry') }}
+        </button>
+
+        <button
+          type="button"
           class="rounded focus:outline-none focus:ring ring-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 inline-flex items-center justify-center h-9 px-3 text-sm font-bold disabled:opacity-50"
           :disabled="saving || resetting"
           @click="confirming = true"
@@ -23,6 +32,68 @@
         >
           {{ saving ? __('Saving...') : __('Save') }}
         </button>
+      </div>
+    </div>
+
+    <div
+      v-if="creating"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4"
+      @click.self="creating = false"
+    >
+      <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
+        <h3 class="mb-4 text-lg font-bold">{{ __('Add a menu entry') }}</h3>
+
+        <div class="mb-4 flex flex-col gap-3">
+          <label class="flex flex-col gap-1">
+            <span class="text-xs text-gray-500">{{ __('Type') }}</span>
+            <select v-model="draft.type" class="form-control form-select form-control-bordered">
+              <option value="section">{{ __('Section — holds other entries') }}</option>
+              <option value="item">{{ __('Link') }}</option>
+            </select>
+            <span v-if="draft.type === 'section'" class="text-xs text-gray-400">
+              {{ __('Drawn as a heading at the top level and as a sub-heading once nested. It stays out of the menu until something is inside it.') }}
+            </span>
+          </label>
+
+          <label class="flex flex-col gap-1">
+            <span class="text-xs text-gray-500">{{ __('Label') }}</span>
+            <input v-model="draft.label" type="text" class="form-control form-input form-control-bordered" />
+          </label>
+
+          <label v-if="draft.type === 'item'" class="flex flex-col gap-1">
+            <span class="text-xs text-gray-500">{{ __('Path or URL') }}</span>
+            <input
+              v-model="draft.path"
+              type="text"
+              class="form-control form-input form-control-bordered"
+              placeholder="/resources/posts"
+            />
+            <span class="text-xs text-gray-400">
+              {{ __('Anything starting with http:// or https:// opens as an external link.') }}
+            </span>
+          </label>
+
+          <label v-if="draft.type === 'section'" class="flex flex-col gap-1">
+            <span class="text-xs text-gray-500">{{ __('Icon') }}</span>
+            <input v-model="draft.icon" type="text" class="form-control form-input form-control-bordered" placeholder="bars-3" />
+          </label>
+        </div>
+
+        <p v-if="createError" class="mb-4 text-sm text-red-500">{{ createError }}</p>
+
+        <div class="flex justify-end gap-3">
+          <button type="button" class="rounded h-9 px-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900" @click="creating = false">
+            {{ __('Cancel') }}
+          </button>
+          <button
+            type="button"
+            class="shadow rounded bg-primary-500 hover:bg-primary-400 text-white dark:text-gray-900 inline-flex items-center justify-center h-9 px-3 text-sm font-bold disabled:opacity-50"
+            :disabled="!draft.label || saving"
+            @click="createEntry"
+          >
+            {{ __('Add') }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -111,6 +182,7 @@ export default {
     return {
       drag: this.drag,
       moveNode: this.moveNode,
+      deleteCustom: this.deleteCustom,
       availablePermissions: computed(() => this.permissions),
     };
   },
@@ -121,6 +193,9 @@ export default {
       saving: false,
       resetting: false,
       confirming: false,
+      creating: false,
+      createError: null,
+      draft: { type: 'section', label: '', path: '', icon: '' },
       tree: [],
       permissions: [],
       // Shared by every branch: one drag crosses levels, so the state cannot
@@ -168,6 +243,38 @@ export default {
       this.drag.node = null;
       this.drag.over = null;
       this.drag.mode = null;
+    },
+
+    openCreate() {
+      this.draft = { type: 'section', label: '', path: '', icon: '' };
+      this.createError = null;
+      this.creating = true;
+    },
+
+    async createEntry() {
+      this.createError = null;
+
+      try {
+        await Nova.request().post('/nova-vendor/nova-menu-weights/custom', this.draft);
+
+        this.creating = false;
+        await this.fetchTree();
+        Nova.success(this.__('Entry added. Save to place it where you want it.'));
+      } catch (error) {
+        this.createError =
+          error.response?.data?.message || this.__('Could not add the entry.');
+      }
+    },
+
+    async deleteCustom(node) {
+      const id = node.id.replace('menu_custom:', '');
+
+      try {
+        await Nova.request().delete(`/nova-vendor/nova-menu-weights/custom/${id}`);
+        await this.fetchTree();
+      } catch (error) {
+        Nova.error(this.__('Could not delete the entry.'));
+      }
     },
 
     async reset() {

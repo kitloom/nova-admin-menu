@@ -7,6 +7,7 @@ namespace Kitloom\NovaMenuWeights\Tests;
 use Illuminate\Http\Request;
 use Kitloom\NovaMenuWeights\MenuWeights;
 use Kitloom\NovaMenuWeights\Repositories\ArrayOverrideRepository;
+use Kitloom\NovaMenuWeights\Support\CustomEntries;
 use Kitloom\NovaMenuWeights\Support\MenuClassMap;
 use Kitloom\NovaMenuWeights\Support\MenuEntries;
 use Kitloom\NovaMenuWeights\Support\MenuIdentity;
@@ -365,6 +366,59 @@ final class MenuWeightsTest extends TestCase
         $this->assertSame(['Vendors'], array_map(fn ($i) => (string) $i->name, $nested->items->all()));
     }
 
+    public function test_a_created_section_is_built_and_recognised(): void
+    {
+        $identity = MenuIdentity::forCustom('abc');
+        $repository = new ArrayOverrideRepository([
+            $identity => ['type' => 'section', 'label' => 'Content', 'icon' => 'document-text', 'weight' => 900],
+        ]);
+
+        $custom = new CustomEntries($repository);
+        $built = $custom->build();
+
+        $this->assertCount(1, $built);
+        $this->assertInstanceOf(MenuSection::class, $built[0]);
+        $this->assertSame('Content', (string) $built[0]->name);
+        $this->assertSame('document-text', $built[0]->icon);
+
+        // Nothing on the object leads back to the row, so the builder has to
+        // be the one that knows.
+        $this->assertSame($identity, $custom->identityOf($built[0]));
+    }
+
+    public function test_a_created_link_is_external_when_the_path_says_so(): void
+    {
+        $repository = new ArrayOverrideRepository([
+            MenuIdentity::forCustom('a') => ['type' => 'item', 'label' => 'Docs', 'path' => 'https://laravel.com'],
+            MenuIdentity::forCustom('b') => ['type' => 'item', 'label' => 'Posts', 'path' => '/resources/posts'],
+        ]);
+
+        [$external, $internal] = (new CustomEntries($repository))->build();
+
+        $this->assertTrue($external->external);
+        $this->assertFalse($internal->external);
+    }
+
+    public function test_a_created_entry_without_a_label_is_skipped(): void
+    {
+        $repository = new ArrayOverrideRepository([
+            MenuIdentity::forCustom('a') => ['type' => 'section'],
+            MenuIdentity::forCustom('b') => ['type' => 'item', 'label' => 'No path'],
+        ]);
+
+        // No label at all, and a link with nowhere to go: neither can render.
+        $this->assertSame([], (new CustomEntries($repository))->build());
+    }
+
+    public function test_rows_that_only_override_are_not_built_as_entries(): void
+    {
+        $repository = new ArrayOverrideRepository([
+            'App\Nova\Tools\Posts' => ['weight' => 900, 'label' => 'Renamed'],
+        ]);
+
+        $this->assertSame([], (new CustomEntries($repository))->build());
+    }
+
     public function test_clearing_drops_every_override(): void
     {
         $repository = new ArrayOverrideRepository([
@@ -392,6 +446,7 @@ final class MenuWeightsTest extends TestCase
             signatures: $signatures,
             entries: new MenuEntries($signatures),
             tree: new MenuTree($signatures),
+            custom: new CustomEntries($repository),
             defaultWeight: 500,
         ))->usingClassMap($map);
 
@@ -593,12 +648,14 @@ final class MenuWeightsTest extends TestCase
     private function menuWeights(array $overrides, MenuClassMap $map): MenuWeights
     {
         $signatures = new MenuSignature;
+        $repository = new ArrayOverrideRepository($overrides);
 
         return (new MenuWeights(
-            repository: new ArrayOverrideRepository($overrides),
+            repository: $repository,
             signatures: $signatures,
             entries: new MenuEntries($signatures),
             tree: new MenuTree($signatures),
+            custom: new CustomEntries($repository),
             defaultWeight: 500,
         ))->usingClassMap($map);
     }

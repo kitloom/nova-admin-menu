@@ -4,6 +4,7 @@ All notable changes to this package are documented here.
 
 ## Unreleased
 
+- Create your own entries: sections, group headings and links, internal or external
 - Reset button: drops every override after a confirmation and reloads
 
 ## v0.1.0

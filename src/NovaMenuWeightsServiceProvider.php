@@ -12,6 +12,7 @@ use Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository;
 use Kitloom\NovaMenuWeights\Facades\MenuWeights as MenuWeightsFacade;
 use Kitloom\NovaMenuWeights\Http\Middleware\Authorize;
 use Kitloom\NovaMenuWeights\Repositories\DatabaseOverrideRepository;
+use Kitloom\NovaMenuWeights\Support\CustomEntries;
 use Kitloom\NovaMenuWeights\Support\MenuEntries;
 use Kitloom\NovaMenuWeights\Support\MenuSignature;
 use Kitloom\NovaMenuWeights\Support\MenuTree;
@@ -30,6 +31,7 @@ final class NovaMenuWeightsServiceProvider extends ServiceProvider
         $this->app->singleton(MenuSignature::class);
         $this->app->singleton(MenuEntries::class);
         $this->app->singleton(MenuTree::class);
+        $this->app->singleton(CustomEntries::class);
 
         $this->app->singleton(MenuOverrideRepository::class, function (Application $app): MenuOverrideRepository {
             $config = $app['config'];
@@ -55,6 +57,7 @@ final class NovaMenuWeightsServiceProvider extends ServiceProvider
                 signatures: $app->make(MenuSignature::class),
                 entries: $app->make(MenuEntries::class),
                 tree: $app->make(MenuTree::class),
+                custom: $app->make(CustomEntries::class),
                 defaultWeight: (int) $app['config']->get('nova-menu-weights.default_weight', 500),
                 allowReparenting: (bool) $app['config']->get('nova-menu-weights.menu.allow_reparenting', true),
             );

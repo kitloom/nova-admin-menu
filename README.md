@@ -74,6 +74,14 @@ grep -o '\b[A-Z][A-Za-z0-9]*Icon\b' vendor/laravel/nova/public/vendor.js | sort 
 ``` Icons apply to sections only: `MenuItem`, `MenuGroup` and `MenuList` render
 without one in Nova, so there is nothing to override on them.
 
+**Add entry** creates one of your own: a section to group things under, a group heading inside a
+section, or a link. A link pointing at something starting with `http://` or `https://` opens as an
+external link. Created entries are ordinary rows on this screen — drag, rename, hide and restrict
+them like anything else — and only they can be deleted; entries the application provides can only
+be hidden.
+
+Nothing checks that a link goes anywhere. That is the admin's call, as is who gets to see it.
+
 **Reset** in the header throws every override away after a confirmation — the order, the moves,
 renamed entries, icons, hidden entries and permissions — and reloads the page. The menu goes back
 to what the application builds on its own. There is no undo.
@@ -127,6 +135,7 @@ Overrides live in one table, `nova_menu_overrides`, a row per changed entry:
 | `permissions` | names the viewer needs one of, empty for everyone |
 | `label`, `icon` | replace what the menu itself renders |
 | `parent_identity` | section the entry was moved into, or `__top__` for the top level |
+| `type`, `path` | set only on entries created here: `section`, `group` or `item`, and where a link goes |
 
 A parent is written **only when it differs** from where the menu itself puts the entry. Storing the
 natural one would freeze the structure, and a later version of a tool adding a child would spend
@@ -240,6 +249,9 @@ three things, in order:
 | 1 | the **class** behind the entry, e.g. `App\Nova\Tools\Posts` | renames of labels and paths |
 | 2 | its **path**, e.g. `menu_path:/resources/posts` | renames of labels, locale changes |
 | 3 | its **label**, e.g. `menu_label:Reports` | nothing — a locale switch loses it |
+
+An entry created on the screen has none of these: nothing in the application produces it. It gets
+an id of its own, `menu_custom:<uuid>`, and is rebuilt from its row on every request.
 
 Only top level entries can be traced back to a class: the package asks every registered tool,
 resource and dashboard what it would render and indexes the result by path and by label. A tool

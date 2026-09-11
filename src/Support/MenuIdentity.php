@@ -34,6 +34,23 @@ final class MenuIdentity
      */
     public const TOP_LEVEL = '__top__';
 
+    /**
+     * Entries this package creates itself, rather than overrides. They have
+     * nothing in the application to be traced back to, so they carry an id of
+     * their own.
+     */
+    public const CUSTOM_PREFIX = 'menu_custom:';
+
+    public static function forCustom(string $id): string
+    {
+        return self::CUSTOM_PREFIX.$id;
+    }
+
+    public static function isCustom(string $identity): bool
+    {
+        return str_starts_with($identity, self::CUSTOM_PREFIX);
+    }
+
     public static function forPath(string $path): string
     {
         return self::PATH_PREFIX.$path;

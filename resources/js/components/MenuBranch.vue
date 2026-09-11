@@ -1,6 +1,17 @@
 <template>
   <ul :class="depth === 0 ? 'space-y-2' : 'mt-2 space-y-1 pl-6 border-l border-gray-200 dark:border-gray-700'">
-    <li v-for="(node, index) in nodes" :key="node.id || `${node.label}-${index}`">
+    <template v-for="(node, index) in nodes" :key="node.id || `${node.label}-${index}`">
+      <li
+        v-show="dragging"
+        class="rounded transition-colors"
+        :class="betweenHover === index ? 'h-8 bg-primary-100 dark:bg-primary-900/40 ring-2 ring-primary-500' : 'h-2'"
+        @dragenter.prevent.stop="betweenHover = index"
+        @dragover.prevent.stop="betweenHover = index"
+        @dragleave="onBetweenLeave($event)"
+        @drop.prevent.stop="dropBetween(index)"
+      />
+
+      <li>
       <div
         class="flex items-center justify-between gap-4 rounded border px-3 py-2"
         :class="[
@@ -23,6 +34,20 @@
           <span class="text-gray-400 text-xs w-6 shrink-0">{{ node.sortable ? '::' : '' }}</span>
           <span class="truncate" :class="[depth === 0 ? 'font-semibold' : '', node.hidden ? 'line-through' : '']">
             {{ node.label_override || node.label }}
+          </span>
+          <span
+            v-if="node.empty"
+            class="shrink-0 text-xs text-yellow-600 dark:text-yellow-500"
+            :title="__('Nova does not draw a container with nothing in it. Drag something inside and it will appear.')"
+          >
+            {{ __('empty — not shown in the menu') }}
+          </span>
+          <span
+            v-if="node.custom"
+            class="shrink-0 rounded bg-primary-100 px-2 py-0.5 text-xs text-primary-600 dark:bg-primary-900/40 dark:text-primary-300"
+            :title="__('Added here, not by the application')"
+          >
+            {{ __('custom') }}
           </span>
           <span
             v-if="node.moved"
@@ -66,6 +91,16 @@
           </button>
 
           <button
+            v-if="node.custom"
+            type="button"
+            class="rounded px-2 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+            :title="__('Delete this entry. Entries the application provides can only be hidden.')"
+            @click.stop="removing = index"
+          >
+            {{ __('delete') }}
+          </button>
+
+          <button
             v-if="node.sortable"
             type="button"
             class="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800"
@@ -77,6 +112,25 @@
             {{ node.hidden ? __('show') : __('hide') }}
           </button>
         </div>
+      </div>
+
+      <div
+        v-if="removing === index"
+        class="mt-2 ml-6 flex items-center gap-3 rounded border border-red-200 p-3 text-sm dark:border-red-900"
+      >
+        <span class="text-gray-500">
+          {{ __('Delete ":name"? Anything moved into it goes back where it was.', { name: node.label_override || node.label }) }}
+        </span>
+        <button type="button" class="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800" @click="removing = null">
+          {{ __('cancel') }}
+        </button>
+        <button
+          type="button"
+          class="rounded bg-red-500 px-2 py-1 text-xs font-bold text-white hover:bg-red-400"
+          @click="removing = null; deleteCustom(node)"
+        >
+          {{ __('delete') }}
+        </button>
       </div>
 
       <div
@@ -92,6 +146,11 @@
               class="form-control form-input form-control-bordered"
               :placeholder="node.label"
             />
+          </label>
+
+          <label v-if="node.custom && node.type === 'item'" class="flex flex-col gap-1">
+            <span class="text-xs text-gray-500">{{ __('Path or URL') }}</span>
+            <input v-model="node.path" type="text" class="form-control form-input form-control-bordered" />
           </label>
 
           <label v-if="node.supports_icon" class="flex flex-col gap-1">
@@ -158,7 +217,32 @@
       </div>
 
       <MenuBranch v-if="node.children.length" :nodes="node.children" :depth="depth + 1" />
-    </li>
+
+      <div
+        v-show="canDropInside(node)"
+        class="ml-6 mt-2 rounded border-2 border-dashed p-3 text-center text-xs"
+        :class="insideHover === index
+          ? 'border-primary-500 text-primary-500'
+          : 'border-gray-300 text-gray-400 dark:border-gray-700'"
+        @dragenter.prevent.stop="insideHover = index"
+        @dragover.prevent.stop="insideHover = index"
+        @dragleave="onZoneLeave($event)"
+        @drop.prevent.stop="dropInside(node)"
+      >
+        {{ __('Drop here to put it inside ":name"', { name: node.label_override || node.label }) }}
+      </div>
+      </li>
+    </template>
+
+    <li
+      v-show="dragging && nodes.length"
+      class="rounded transition-colors"
+      :class="betweenHover === nodes.length ? 'h-8 bg-primary-100 dark:bg-primary-900/40 ring-2 ring-primary-500' : 'h-2'"
+      @dragenter.prevent.stop="betweenHover = nodes.length"
+      @dragover.prevent.stop="betweenHover = nodes.length"
+      @dragleave="onBetweenLeave($event)"
+      @drop.prevent.stop="dropBetween(nodes.length)"
+    />
   </ul>
 </template>
 
@@ -169,7 +253,7 @@ import { isDescendant } from '../tree';
 export default {
   name: 'MenuBranch',
 
-  inject: ['drag', 'moveNode', 'availablePermissions'],
+  inject: ['drag', 'moveNode', 'deleteCustom', 'availablePermissions'],
 
   props: {
     nodes: { type: Array, required: true },
@@ -177,10 +261,14 @@ export default {
   },
 
   data() {
-    return { editing: null, permissionDraft: '' };
+    return { editing: null, removing: null, insideHover: null, betweenHover: null, dragTimer: null, permissionDraft: '' };
   },
 
   computed: {
+    dragging() {
+      return !! this.drag.node;
+    },
+
     listId() {
       return `nmw-permissions-${this.depth}-${this.editing}`;
     },
@@ -212,6 +300,70 @@ export default {
         : icons;
     },
 
+    /**
+     * Aiming at the middle of a row is fiddly, and an empty container has no
+     * children to aim between at all - so each container grows an explicit
+     * target while a drag is in progress.
+     */
+    canDropInside(node) {
+      const dragged = this.drag.node;
+
+      return (
+        !!dragged &&
+        node.can_accept_children &&
+        dragged !== node &&
+        !isDescendant(dragged, node)
+      );
+    },
+
+    onBetweenLeave(event) {
+      if (! event.currentTarget.contains(event.relatedTarget)) {
+        this.betweenHover = null;
+      }
+    },
+
+    /**
+     * Drop on the strip before entry `index`, or on the trailing one to land
+     * last. Aiming at the edge of a row still works; this is the target that
+     * cannot be missed.
+     */
+    dropBetween(index) {
+      const dragged = this.drag.node;
+
+      this.betweenHover = null;
+
+      if (dragged) {
+        const last = index >= this.nodes.length;
+        const reference = last ? this.nodes[this.nodes.length - 1] : this.nodes[index];
+
+        if (reference && reference !== dragged) {
+          this.moveNode(dragged, reference, last ? 'after' : 'before');
+        }
+      }
+
+      this.onDragEnd();
+    },
+
+    onZoneLeave(event) {
+      // Moving onto the zone's own text fires dragleave too; only a pointer
+      // that actually left the box should put the highlight out.
+      if (! event.currentTarget.contains(event.relatedTarget)) {
+        this.insideHover = null;
+      }
+    },
+
+    dropInside(node) {
+      const dragged = this.drag.node;
+
+      this.insideHover = null;
+
+      if (dragged && this.canDropInside(node)) {
+        this.moveNode(dragged, node, 'inside');
+      }
+
+      this.onDragEnd();
+    },
+
     onDragStart(node, event) {
       if (!node.sortable) {
         return;
@@ -221,8 +373,21 @@ export default {
       // that ends up moving is not the one grabbed.
       event.stopPropagation();
 
-      this.drag.node = node;
       event.dataTransfer.effectAllowed = 'move';
+
+      // A drag with nothing on the clipboard is cancelled the moment it
+      // starts: Chrome fires dragstart and then dragend, with no dragover in
+      // between. The payload itself is never read - the tree is moved through
+      // the shared state - but it has to be there.
+      event.dataTransfer.setData('text/plain', node.id || node.label);
+
+      // Chrome drops a drag whose source is patched from inside dragstart:
+      // it fires dragstart, then dragend at once, with no dragover between.
+      // Publishing the state a tick later lets the drag engage first.
+      this.dragTimer = setTimeout(() => {
+          this.dragTimer = null;
+          this.drag.node = node;
+      }, 0);
     },
 
     /**
@@ -269,6 +434,14 @@ export default {
     },
 
     onDragEnd() {
+      // The drag may end before the deferred state was ever published.
+      if (this.dragTimer) {
+        clearTimeout(this.dragTimer);
+        this.dragTimer = null;
+      }
+
+      this.insideHover = null;
+      this.betweenHover = null;
       this.drag.node = null;
       this.drag.over = null;
       this.drag.mode = null;

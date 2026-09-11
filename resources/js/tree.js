@@ -84,6 +84,7 @@ export function flatten(nodes, parent = null, into = []) {
         label: node.label_override || null,
         icon: node.supports_icon ? node.icon_override || null : null,
         permissions: node.permissions || [],
+        path: node.path || null,
       });
     }
 

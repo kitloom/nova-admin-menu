@@ -1,4 +1,5 @@
 let mix = require('laravel-mix');
+let webpack = require('webpack');
 let path = require('path');
 
 mix
@@ -6,6 +7,12 @@ mix
     .js('resources/js/entry.js', 'js')
     .vue({ version: 3 })
     .webpackConfig({
+        plugins: [
+            // Stamps each build so a stale tab can be spotted from the console.
+            new webpack.DefinePlugin({
+                __NMW_BUILD__: JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ')),
+            }),
+        ],
         externals: {
             vue: 'Vue',
         },

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository;
+use Kitloom\NovaMenuWeights\Support\CustomEntries;
 use Kitloom\NovaMenuWeights\Support\MenuClassMap;
 use Kitloom\NovaMenuWeights\Support\MenuEntries;
 use Kitloom\NovaMenuWeights\Support\MenuIdentity;
@@ -40,6 +41,7 @@ final class MenuWeights
         private readonly MenuSignature $signatures,
         private readonly MenuEntries $entries,
         private readonly MenuTree $tree,
+        private readonly CustomEntries $custom,
         private readonly int $defaultWeight = 500,
         private readonly bool $allowReparenting = true,
     ) {}
@@ -90,6 +92,7 @@ final class MenuWeights
     {
         $items = array_merge(
             $this->resolvePrepended($request),
+            $this->custom->build(),
             $this->withoutRejected(Nova::defaultMainMenu($request)->items->all(), $request),
         );
 
@@ -283,6 +286,7 @@ final class MenuWeights
     {
         $items = array_merge(
             $this->resolvePrepended($request),
+            $this->custom->build(),
             $this->withoutRejected($items, $request),
         );
 
@@ -491,6 +495,14 @@ final class MenuWeights
             return null;
         }
 
+        // An entry this package built knows its own row; nothing about the
+        // object itself would lead back to it.
+        $custom = $this->custom->identityOf($item);
+
+        if ($custom !== null) {
+            return $custom;
+        }
+
         $classMap ??= $this->classMap();
 
         $className = $classMap->find(
@@ -566,6 +578,7 @@ final class MenuWeights
     public function flush(): void
     {
         $this->classMap = null;
+        $this->custom->forget();
         $this->repository->flush();
     }
 }

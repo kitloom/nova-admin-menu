@@ -7,6 +7,7 @@ namespace Kitloom\NovaMenuWeights\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Str;
 use Kitloom\NovaMenuWeights\Contracts\MenuOverrideRepository;
 use Kitloom\NovaMenuWeights\MenuWeights;
 use Kitloom\NovaMenuWeights\Support\MenuIdentity;
@@ -45,6 +46,7 @@ class MenuOrderController extends Controller
             'entries.*.id' => ['required', 'string'],
             'entries.*.hidden' => ['sometimes', 'boolean'],
             'entries.*.parent' => ['nullable', 'string'],
+            'entries.*.path' => ['nullable', 'string', 'max:2048'],
             'entries.*.permissions' => ['sometimes', 'array'],
             'entries.*.permissions.*' => ['required', 'string', 'max:191'],
             'entries.*.label' => ['nullable', 'string', 'max:255'],
@@ -80,6 +82,9 @@ class MenuOrderController extends Controller
                         'label' => $entry['label'] ?? null,
                         'icon' => $entry['icon'] ?? null,
                         'permissions' => array_values($entry['permissions'] ?? []),
+                        // Only an entry of the admin's own has a path to edit;
+                        // everything else gets its path from the application.
+                        'path' => MenuIdentity::isCustom($entry['id']) ? ($entry['path'] ?? null) : null,
                         'parent_identity' => $reparenting
                             ? $this->menuWeights->parentToStore(
                                 $entry['id'],
@@ -96,6 +101,55 @@ class MenuOrderController extends Controller
         $this->menuWeights->flush();
 
         return response()->json(['saved' => $entries->count()]);
+    }
+
+    /**
+     * Add an entry of the admin's own. It has nothing in the application
+     * behind it, so it carries an id of its own and is rebuilt from the row
+     * on every request.
+     */
+    public function storeCustom(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'type' => ['required', 'string', 'in:section,group,item'],
+            'label' => ['required', 'string', 'max:255'],
+            'icon' => ['nullable', 'string', 'max:64', 'regex:/^[a-z0-9-]+$/'],
+            'path' => ['nullable', 'string', 'max:2048', 'required_if:type,item'],
+        ], [
+            'path.required_if' => __('A link needs a path or a URL.'),
+            'icon.regex' => __('An icon is a heroicon name, such as "squares-2x2".'),
+        ]);
+
+        $identity = MenuIdentity::forCustom((string) Str::uuid());
+
+        $this->repository->put($identity, [
+            'type' => $validated['type'],
+            'label' => $validated['label'],
+            'icon' => $validated['icon'] ?? null,
+            'path' => $validated['path'] ?? null,
+        ]);
+
+        $this->menuWeights->flush();
+
+        return response()->json(['id' => $identity], 201);
+    }
+
+    /**
+     * Remove one the admin added. Entries belonging to the application are
+     * not deletable - hiding is what they get.
+     */
+    public function destroyCustom(Request $request, string $id): JsonResponse
+    {
+        $identity = MenuIdentity::forCustom($id);
+
+        if ($this->repository->find($identity)?->type === null) {
+            return response()->json(['message' => __('No such entry.')], 404);
+        }
+
+        $this->repository->forget($identity);
+        $this->menuWeights->flush();
+
+        return response()->json(['deleted' => $identity]);
     }
 
     /**
@@ -152,7 +206,14 @@ class MenuOrderController extends Controller
                 'icon' => $item->icon ?? null,
                 'icon_override' => $override?->icon,
                 'supports_icon' => $this->menuWeights->supportsIcon($item),
+                'custom' => $identity !== null && MenuIdentity::isCustom($identity),
+                'path' => $identity !== null && MenuIdentity::isCustom($identity) ? $override?->path : null,
                 'can_accept_children' => $this->signatures->canAcceptChildren($item),
+                // Nova draws a container only when it holds something or
+                // links somewhere, so an empty one silently never appears.
+                'empty' => $this->signatures->canAcceptChildren($item)
+                    && $item->items->isEmpty()
+                    && ($item->path ?? null) === null,
                 'moved' => $identity !== null && $this->menuWeights->isMovedFromNatural($identity, $natural),
                 'type' => strtolower(str_replace('Menu', '', class_basename($item))),
                 'via' => $identity === null ? null : $this->via($identity),
