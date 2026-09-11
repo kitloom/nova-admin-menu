@@ -1,19 +1,18 @@
-# Nova Menu Weights
+# Nova Admin Menu
 
-Reorder the Laravel Nova main menu from the admin panel instead of hardcoding the order in
-`NovaServiceProvider`.
+Manage the Laravel Nova admin menu from the admin panel, instead of describing it in
+`NovaServiceProvider` and deploying for every change.
 
-Every tool, resource and dashboard gets a numeric weight stored in the database. Heavier entries
-float to the top, nested sections and groups are sorted recursively, and entries without a weight
-keep the position Nova gave them.
+Everything Nova renders in the sidebar — tools, resources, dashboards and the entries they nest
+inside themselves — can be rearranged from a screen, and what the admin changes is stored as an
+override on top of whatever the application builds.
 
-- Works with **tools, resources and dashboards** — not just resources
-- Sorts **nested** entries too — submenus, not just the top level
-- A **drag and drop screen**: reorder the menu by hand, weights are derived from the position
+- A **drag and drop screen** for the whole menu, nesting included
+- **Move** entries between sections, not just up and down within one
+- **Rename** entries and change the **icon** of top level sections
+- **Add** sections and links of your own
 - **Hide** entries you do not want in the sidebar, without touching any code
 - **Restrict** an entry to the permissions you name, whatever your permission system is
-- **Rename** entries and change the **icon** of top level sections
-- **Move** entries between sections, not just up and down within one
 - Storage is a **contract**: one small table by default, or plug in your own
 - No changes to your resource classes
 

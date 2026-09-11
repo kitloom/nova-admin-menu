@@ -1,13 +1,15 @@
 {
     "name": "kitloom/nova-admin-menu",
-    "description": "Reorder the Laravel Nova main menu from the admin panel: weights for tools, resources and dashboards, stored in the database instead of hardcoded in the service provider.",
+    "description": "Manage the Laravel Nova admin menu from the admin panel: reorder and nest entries by dragging, move them between sections, rename them, set icons, hide them, restrict them to permissions, and add sections and links of your own.",
     "keywords": [
         "laravel",
         "nova",
+        "admin",
         "menu",
         "sidebar",
         "navigation",
-        "sorting"
+        "sorting",
+        "drag-and-drop"
     ],
     "homepage": "https://github.com/kitloom/nova-admin-menu",
     "license": "MIT",
