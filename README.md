@@ -16,12 +16,12 @@ override on top of whatever the application builds.
 - Storage is a **contract**: one small table by default, or plug in your own
 - No changes to your resource classes
 
-![The menu, as the admin arranges it](art/menu-tree.png)
+![The menu, as the admin arranges it](https://raw.githubusercontent.com/kitloom/nova-admin-menu/main/art/menu-tree.png)
 
 Sections and links the admin added, entries moved into them, the sidebar on the left showing the
 result.
 
-![Adding an entry](art/add-entry.png)
+![Adding an entry](https://raw.githubusercontent.com/kitloom/nova-admin-menu/main/art/add-entry.png)
 
 ## Requirements
 
@@ -57,7 +57,7 @@ Nova::mainMenu(function (Request $request, Menu $menu) {
 });
 ```
 
-## Editing the weights
+## Editing the menu
 
 The package registers a Nova tool at `/nova-admin-menu` showing the menu as a tree. Drag the rows,
 hit save, and the weights are recalculated from the position — in steps of 100, so there is room to
