@@ -1,35 +1,38 @@
 <template>
-  <LoadingView :loading="loading">
+  <LoadingView :loading="loading" class="nova-admin-menu">
     <Head :title="title" />
 
     <div class="flex items-center justify-between mb-6">
       <Heading>{{ title }}</Heading>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
         <button
           type="button"
-          class="rounded focus:outline-none focus:ring ring-primary-200 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 inline-flex items-center justify-center h-9 px-3 text-sm font-bold disabled:opacity-50"
+          :class="[BUTTON, LARGE, NEUTRAL]"
           :disabled="saving || resetting"
           @click="openCreate"
         >
+          <MenuIcon name="plus" size="small" class="mr-2" />
           {{ __('Add entry') }}
         </button>
 
         <button
           type="button"
-          class="rounded focus:outline-none focus:ring ring-red-200 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 inline-flex items-center justify-center h-9 px-3 text-sm font-bold disabled:opacity-50"
+          :class="[BUTTON, LARGE, DANGER]"
           :disabled="saving || resetting"
           @click="confirming = true"
         >
+          <MenuIcon name="arrow-uturn-left" size="small" class="mr-2" />
           {{ __('Reset') }}
         </button>
 
         <button
           type="button"
-          class="shadow rounded focus:outline-none focus:ring ring-primary-200 bg-primary-500 hover:bg-primary-400 active:bg-primary-600 text-white dark:text-gray-900 inline-flex items-center justify-center h-9 px-3 text-sm font-bold disabled:opacity-50"
+          :class="[BUTTON, LARGE, SOLID]"
           :disabled="saving || resetting || !tree.length"
           @click="save"
         >
+          <MenuIcon name="check" size="small" class="mr-2" />
           {{ saving ? __('Saving...') : __('Save') }}
         </button>
       </div>
@@ -46,7 +49,7 @@
         <div class="mb-4 flex flex-col gap-3">
           <label class="flex flex-col gap-1">
             <span class="text-xs text-gray-500">{{ __('Type') }}</span>
-            <select v-model="draft.type" class="form-control form-select form-control-bordered">
+            <select v-model="draft.type" class="form-control form-control-bordered form-input">
               <option value="section">{{ __('Section — holds other entries') }}</option>
               <option value="item">{{ __('Link') }}</option>
             </select>
@@ -82,12 +85,12 @@
         <p v-if="createError" class="mb-4 text-sm text-red-500">{{ createError }}</p>
 
         <div class="flex justify-end gap-3">
-          <button type="button" class="rounded h-9 px-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900" @click="creating = false">
+          <button type="button" :class="[BUTTON, LARGE, NEUTRAL]" @click="creating = false">
             {{ __('Cancel') }}
           </button>
           <button
             type="button"
-            class="shadow rounded bg-primary-500 hover:bg-primary-400 text-white dark:text-gray-900 inline-flex items-center justify-center h-9 px-3 text-sm font-bold disabled:opacity-50"
+            :class="[BUTTON, LARGE, SOLID]"
             :disabled="!draft.label || saving"
             @click="createEntry"
           >
@@ -114,7 +117,7 @@
         <div class="flex justify-end gap-3">
           <button
             type="button"
-            class="rounded h-9 px-3 text-sm font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900"
+            :class="[BUTTON, LARGE, NEUTRAL]"
             :disabled="resetting"
             @click="confirming = false"
           >
@@ -123,7 +126,7 @@
 
           <button
             type="button"
-            class="shadow rounded bg-red-500 hover:bg-red-400 active:bg-red-600 text-white inline-flex items-center justify-center h-9 px-3 text-sm font-bold disabled:opacity-50"
+            :class="[BUTTON, LARGE, SOLID_DANGER]"
             :disabled="resetting"
             @click="reset"
           >
@@ -173,10 +176,12 @@
 <script>
 import { computed } from 'vue';
 import MenuBranch from '../components/MenuBranch';
+import MenuIcon from '../components/MenuIcon.vue';
+import { BUTTON, LARGE, NEUTRAL, DANGER, SOLID, SOLID_DANGER } from '../buttons';
 import { detach, flatten, move } from '../tree';
 
 export default {
-  components: { MenuBranch },
+  components: { MenuBranch, MenuIcon },
 
   props: {
     path: { type: String, default: null },
@@ -194,6 +199,12 @@ export default {
 
   data() {
     return {
+      BUTTON,
+      LARGE,
+      NEUTRAL,
+      DANGER,
+      SOLID,
+      SOLID_DANGER,
       loading: true,
       saving: false,
       resetting: false,

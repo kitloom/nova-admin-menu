@@ -1,0 +1,52 @@
+/*
+ * The utilities this screen needs that Nova's own stylesheet does not carry.
+ *
+ * A Nova tool gets no stylesheet of its own unless it builds one, and Nova's
+ * app.css holds only the classes Nova itself uses - so half the Tailwind
+ * names one reaches for silently do nothing. Rather than ship a second
+ * Tailwind build for twenty rules, they are written out here, scoped to the
+ * tool so nothing of Nova's is redefined, and using Nova's own colour
+ * variables so they follow the panel's theme.
+ *
+ * Regenerate the list of what is missing with:
+ *   php artisan nova-admin-menu:check-classes   (see tests/)
+ */
+
+.nova-admin-menu { }
+
+.nova-admin-menu .gap-3 { gap: .75rem }
+.nova-admin-menu .ml-6 { margin-left: 1.5rem }
+.nova-admin-menu .min-w-0 { min-width: 0 }
+.nova-admin-menu .items-end { align-items: flex-end }
+.nova-admin-menu .cursor-move { cursor: move }
+.nova-admin-menu .line-through { text-decoration-line: line-through }
+.nova-admin-menu .opacity-40 { opacity: .4 }
+.nova-admin-menu .opacity-60 { opacity: .6 }
+.nova-admin-menu .shadow-sm { box-shadow: 0 1px 2px 0 rgb(0 0 0 / .05) }
+.nova-admin-menu .transition-shadow {
+  transition-property: box-shadow;
+  transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+  transition-duration: .15s;
+}
+
+/* The drag and drop feedback: where the row will land. */
+.nova-admin-menu .border-t-2 { border-top-width: 2px }
+.nova-admin-menu .border-t-primary-500 { border-top-color: rgba(var(--colors-primary-500)) }
+.nova-admin-menu .border-b-primary-500 { border-bottom-color: rgba(var(--colors-primary-500)) }
+.nova-admin-menu .ring-2 {
+  box-shadow: 0 0 0 2px var(--tw-ring-color, rgba(var(--colors-primary-500)));
+}
+.nova-admin-menu .ring-primary-500 { --tw-ring-color: rgba(var(--colors-primary-500)) }
+
+/* Dimmed backdrop behind a modal. */
+.nova-admin-menu .bg-gray-900\/60 { background-color: rgba(var(--colors-gray-900), .6) }
+
+/* A ghost button whose panel is open. */
+.nova-admin-menu .bg-gray-700\/5 { background-color: rgba(var(--colors-gray-700), .05) }
+.dark .nova-admin-menu .dark\:bg-primary-900\/40 { background-color: rgba(var(--colors-primary-900), .4) }
+.dark .nova-admin-menu .dark\:text-primary-300 { color: rgba(var(--colors-primary-300)) }
+.dark .nova-admin-menu .dark\:text-yellow-500 { color: rgb(234 179 8) }
+.dark .nova-admin-menu .dark\:border-red-900 { border-color: rgb(127 29 29) }
+
+.nova-admin-menu .border-red-200 { border-color: rgb(254 202 202) }
+.nova-admin-menu .hover\:bg-red-400:hover { background-color: rgb(248 113 113) }

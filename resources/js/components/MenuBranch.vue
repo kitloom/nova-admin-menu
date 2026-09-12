@@ -13,10 +13,10 @@
 
       <li>
       <div
-        class="flex items-center justify-between gap-4 rounded border px-3 py-2"
+        class="flex items-center justify-between gap-4 rounded-lg border px-2 py-2 transition-shadow"
         :class="[
           node.sortable
-            ? 'cursor-move border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900'
+            ? 'cursor-move border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm'
             : 'border-dashed border-gray-200 dark:border-gray-700 opacity-60',
           node.hidden ? 'opacity-50' : '',
           drag.node === node ? 'opacity-40' : '',
@@ -31,7 +31,16 @@
         @dragend="onDragEnd"
       >
         <div class="flex items-center gap-3 min-w-0">
-          <span class="text-gray-400 text-xs w-6 shrink-0">{{ node.sortable ? '::' : '' }}</span>
+          <span class="w-6 shrink-0 text-gray-300 dark:text-gray-600">
+            <MenuIcon v-if="node.sortable" name="arrows-up-down" size="small" />
+          </span>
+
+          <MenuIcon
+            :name="typeIcon(node)"
+            size="small"
+            class="shrink-0 text-gray-400 dark:text-gray-500"
+            :title="node.type"
+          />
           <span class="truncate" :class="[depth === 0 ? 'font-semibold' : '', node.hidden ? 'line-through' : '']">
             {{ node.label_override || node.label }}
           </span>
@@ -67,9 +76,6 @@
           >
             ({{ node.label }})
           </span>
-          <span class="shrink-0 rounded bg-gray-200 px-2 py-0.5 text-xs uppercase tracking-wide text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-            {{ node.type }}
-          </span>
           <span
             v-if="node.via === 'label'"
             class="shrink-0 text-xs text-yellow-600 dark:text-yellow-500"
@@ -87,33 +93,33 @@
           <button
             v-if="node.sortable"
             type="button"
-            class="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800"
+            :class="[BUTTON, SMALL, editing === index ? ACTIVE : NEUTRAL]"
             :title="__('Rename this entry or change its icon')"
             @click.stop="editing = editing === index ? null : index"
           >
-            {{ __('edit') }}
+            <MenuIcon name="pencil" size="small" />
           </button>
 
           <button
             v-if="node.custom"
             type="button"
-            class="rounded px-2 py-1 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+            :class="[BUTTON, SMALL, DANGER]"
             :title="__('Delete this entry. Entries the application provides can only be hidden.')"
             @click.stop="removing = index"
           >
-            {{ __('delete') }}
+            <MenuIcon name="trash" size="small" />
           </button>
 
           <button
             v-if="node.sortable"
             type="button"
-            class="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800"
+            :class="[BUTTON, SMALL, NEUTRAL]"
             :title="node.hidden
               ? __('Show this entry in the sidebar')
               : __('Hide this entry from the sidebar. It stays here so it can be brought back.')"
             @click.stop="node.hidden = !node.hidden"
           >
-            {{ node.hidden ? __('show') : __('hide') }}
+            <MenuIcon :name="node.hidden ? 'eye-slash' : 'eye'" size="small" />
           </button>
         </div>
       </div>
@@ -125,7 +131,7 @@
         <span class="text-gray-500">
           {{ __('Delete ":name"? Anything moved into it goes back where it was.', { name: node.label_override || node.label }) }}
         </span>
-        <button type="button" class="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800" @click="removing = null">
+        <button type="button" :class="[BUTTON, SMALL, NEUTRAL]" @click="removing = null">
           {{ __('cancel') }}
         </button>
         <button
@@ -161,7 +167,7 @@
             <span class="text-xs text-gray-500">{{ __('Icon') }}</span>
             <select
               v-model="node.icon_override"
-              class="form-control form-select form-control-bordered"
+              class="form-control form-control-bordered form-input"
             >
               <option :value="null">
                 {{ node.icon ? __('default (:icon)', { icon: node.icon }) : __('none') }}
@@ -178,9 +184,10 @@
 
           <button
             type="button"
-            class="rounded px-2 py-1 text-xs text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-800"
+            :class="[BUTTON, SMALL, NEUTRAL]"
             @click="node.label_override = null; node.icon_override = null"
           >
+            <MenuIcon name="arrow-uturn-left" size="small" class="mr-1" />
             {{ __('reset') }}
           </button>
         </div>
@@ -253,9 +260,13 @@
 <script>
 import icons from '../icons';
 import { isDescendant } from '../tree';
+import MenuIcon from './MenuIcon.vue';
+import { BUTTON, SMALL, NEUTRAL, DANGER, ACTIVE } from '../buttons';
 
 export default {
   name: 'MenuBranch',
+
+  components: { MenuIcon },
 
   inject: ['drag', 'moveNode', 'deleteCustom', 'availablePermissions'],
 
@@ -265,7 +276,19 @@ export default {
   },
 
   data() {
-    return { editing: null, removing: null, insideHover: null, betweenHover: null, dragTimer: null, permissionDraft: '' };
+    return {
+      editing: null,
+      removing: null,
+      insideHover: null,
+      betweenHover: null,
+      dragTimer: null,
+      permissionDraft: '',
+      BUTTON,
+      SMALL,
+      NEUTRAL,
+      DANGER,
+      ACTIVE,
+    };
   },
 
   computed: {
@@ -279,6 +302,14 @@ export default {
   },
 
   methods: {
+    /**
+     * What the entry is, drawn rather than spelled out: a sidebar heading, a
+     * sub-menu heading, or a link.
+     */
+    typeIcon(node) {
+      return { section: 'rectangle-group', group: 'folder' }[node.type] || 'link';
+    },
+
     addPermission(node) {
       const value = this.permissionDraft.trim();
 

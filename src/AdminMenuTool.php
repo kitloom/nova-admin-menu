@@ -17,6 +17,10 @@ class AdminMenuTool extends Tool
     public function boot(): void
     {
         Nova::script('nova-admin-menu', __DIR__.'/../dist/js/entry.js');
+
+        // Nova's stylesheet carries only the utilities Nova itself uses, so
+        // the ones this screen needs on top of those are shipped with it.
+        Nova::style('nova-admin-menu', __DIR__.'/../dist/css/entry.css');
     }
 
     public function menu(Request $request): ?MenuSection
